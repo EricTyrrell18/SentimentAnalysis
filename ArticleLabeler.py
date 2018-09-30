@@ -1,6 +1,7 @@
 import pandas
 import pandas_datareader
 import os
+import calendar
 class ArticleLabeler:
     def __init__(self, filename):
         self.create_directories()
@@ -13,10 +14,10 @@ class ArticleLabeler:
         print("end = " + end_date)
         print(type(start_date))
         print(end_date)
-        self.stock_df = pandas_datareader.DataReader("AAPL", "iex", "9-27-2018")
+        self.stock_df = pandas_datareader.DataReader("AAPL", "iex", "9-01-2018")
 
     def create_directories(self):
-        labels = ("Positive", "Negative")
+        labels = ("Positive", "Negative", "Broken")
 
         for label in labels:
             #Create the directories if they don't exist already
@@ -36,11 +37,17 @@ class ArticleLabeler:
 
     def label_article(self, date):
         """Returns a string - 'Positive' or 'Negative' based on the open and closing prices"""
-        historical_price = self.stock_df.loc[date]
+        try:
+            historical_price = self.stock_df.loc[date]
+        except KeyError:
+            #Weekends and Holidays will be placed here until I figure out what to do with them
+            return "Broken"
+
         if float(historical_price['open'] > float(historical_price['close'])):
             return "Negative"
         else:
             return "Positive"
+
 
 
     def read_csv(self, filename):
